@@ -192,6 +192,16 @@ jobs:
 
       - run: |
           cd assets
+          # artifact 上传/下载会丢掉文件的可执行位（linux/macOS 包实测全变成 644），
+          # 这里在压缩前统一恢复；上游 MFAAvalonia 发行的包里本来就是所有文件 755。
+          # Artifact upload/download drops the executable bit; restore it before zipping
+          # (the upstream MFAAvalonia package ships everything as 755 anyway).
+          for d in *; do
+            case "$d" in
+              *-win-*) ;;
+              *) chmod -R +x "$d" || true ;;
+            esac
+          done
           for f in *; do
             (cd $f && zip -r ../$f-${{ needs.meta.outputs.tag }}.zip .)
           done
