@@ -1,0 +1,52 @@
+{
+    "下一层": {
+        "recognition": "OCR",
+        "expected": "前往",
+        "action": "Click",
+        "next": [
+            "深渊选择"
+        ]
+    },
+    "深渊选择": {
+        "next": [
+            "深渊1",
+            "深渊2",
+            "深渊3"
+        ]
+    },
+    "深渊1": {
+        "recognition": "OCR",
+        "expected": "42米",
+        "action": "DoNothing",
+        "next": [
+            "行动1"
+        ]
+    },
+    "行动1": {
+        "action": "Swipe",
+        "begin": [
+            742,
+            321,
+            50,
+            50
+        ],
+        "end": [
+            475,
+            326,
+            50,
+            50
+        ]
+    },
+    "深渊2": {
+        "recognition": "OCR",
+        "expected": "深渊",
+        "action": "DoNothing",
+        "next": []
+    },
+    "深渊3": {
+        "recognition": "OCR",
+        "expected": "深渊",
+        "action": "DoNothing",
+        "next": []
+    }
+}
