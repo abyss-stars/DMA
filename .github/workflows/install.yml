@@ -127,11 +127,16 @@ jobs:
               rsync -av --ignore-existing MFA/ install/
               echo "MFA files copied successfully."
 
-              # 把 GUI 主程序改名为 DMA.exe
+              # 把 GUI 主程序改名为 DMA（Windows 下为 DMA.exe）
               # 多文件发布（PublishSingleFile=false），apphost 仍按内嵌名从同目录加载 MFAAvalonia.dll，改名安全
+              # linux/macOS 包内是裸 dotnet publish 产物（无 .app/Info.plist/launcher 脚本），改名同样安全
               if [[ "${{ matrix.os }}" == "win" ]]; then
                 mv install/MFAAvalonia.exe install/DMA.exe
                 echo "Renamed GUI executable: MFAAvalonia.exe -> DMA.exe"
+              else
+                mv install/MFAAvalonia install/DMA
+                chmod +x install/DMA
+                echo "Renamed GUI executable: MFAAvalonia -> DMA"
               fi
             else
               echo "MFA directory not found, skipping copy."
