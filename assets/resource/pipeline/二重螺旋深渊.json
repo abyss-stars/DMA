@@ -1,52 +1,193 @@
 {
-    "下一层": {
-        "recognition": "OCR",
-        "expected": "前往",
+    "深渊主循环": {
+        "timeout": -1,
+        "rate_limit": 2000,
+        "next": [
+            "深渊下一层",
+            "深渊开始挑战",
+            "深渊重新开始"
+        ]
+    },
+    "深渊下一层": {
+        "recognition": "TemplateMatch",
+        "template": "nextfloor.png",
+        "roi": [
+            920,
+            620,
+            360,
+            100
+        ],
         "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 40000,
+        "on_error": [
+            "深渊主循环"
+        ],
         "next": [
-            "深渊选择"
+            "深渊长移动"
         ]
     },
-    "深渊选择": {
+    "深渊重新开始": {
+        "recognition": "TemplateMatch",
+        "template": "restart.png",
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 40000,
+        "on_error": [
+            "深渊主循环"
+        ],
         "next": [
-            "深渊1",
-            "深渊2",
-            "深渊3"
+            "深渊长移动"
         ]
     },
-    "深渊1": {
-        "recognition": "OCR",
-        "expected": "42米",
-        "action": "DoNothing",
-        "next": [
-            "行动1"
-        ]
-    },
-    "行动1": {
+    "深渊长移动": {
+        "recognition": "TemplateMatch",
+        "template": "start.png",
+        "roi": [
+            58,
+            238,
+            218,
+            63
+        ],
         "action": "Swipe",
         "begin": [
-            742,
-            321,
-            50,
-            50
+            207,
+            529,
+            22,
+            18
         ],
         "end": [
-            475,
-            326,
-            50,
-            50
+            305,
+            455,
+            15,
+            12
+        ],
+        "duration": 1600,
+        "pre_delay": 0,
+        "post_delay": 300,
+        "timeout": 6000,
+        "on_error": [
+            "深渊进入战斗",
+            "深渊微调",
+            "深渊主循环"
+        ],
+        "next": [
+            "深渊开始挑战"
         ]
     },
-    "深渊2": {
-        "recognition": "OCR",
-        "expected": "深渊",
-        "action": "DoNothing",
-        "next": []
+    "深渊微调": {
+        "recognition": "TemplateMatch",
+        "template": "start.png",
+        "roi": [
+            58,
+            238,
+            218,
+            63
+        ],
+        "action": "Swipe",
+        "begin": [
+            207,
+            529,
+            22,
+            18
+        ],
+        "end": [
+            240,
+            495,
+            23,
+            13
+        ],
+        "duration": 160,
+        "pre_delay": 0,
+        "post_delay": 300,
+        "rate_limit": 500,
+        "timeout": 4000,
+        "on_error": [
+            "深渊进入战斗",
+            "深渊微调",
+            "深渊主循环"
+        ],
+        "next": [
+            "深渊开始挑战"
+        ]
     },
-    "深渊3": {
-        "recognition": "OCR",
-        "expected": "深渊",
-        "action": "DoNothing",
-        "next": []
+    "深渊开始挑战": {
+        "recognition": "TemplateMatch",
+        "template": "开始深渊.png",
+        "roi": [
+            630,
+            310,
+            380,
+            100
+        ],
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 20000,
+        "on_error": [
+            "深渊主循环"
+        ],
+        "next": [
+            "深渊进入战斗"
+        ]
+    },
+    "深渊进入战斗": {
+        "recognition": "TemplateMatch",
+        "template": "start.png",
+        "roi": [
+            58,
+            238,
+            218,
+            63
+        ],
+        "inverse": true,
+        "pre_delay": 0,
+        "post_delay": 500,
+        "timeout": 30000,
+        "on_error": [
+            "深渊主循环"
+        ],
+        "next": [
+            "深渊开大"
+        ]
+    },
+    "深渊开大": {
+        "recognition": "TemplateMatch",
+        "template": "艾达大招.png",
+        "roi": [
+            880,
+            560,
+            180,
+            160
+        ],
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 30000,
+        "on_error": [
+            "深渊主循环"
+        ],
+        "next": [
+            "深渊小技能"
+        ]
+    },
+    "深渊小技能": {
+        "recognition": "TemplateMatch",
+        "template": "艾达e技能.png",
+        "roi": [
+            800,
+            570,
+            180,
+            150
+        ],
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 30000,
+        "next": [
+            "深渊主循环"
+        ]
     }
 }

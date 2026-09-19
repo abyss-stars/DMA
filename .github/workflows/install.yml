@@ -140,7 +140,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: MaaXXX-${{ matrix.os }}-${{ matrix.arch }}
+          name: DMA-${{ matrix.os }}-${{ matrix.arch }}
           path: "install"
 
   changelog:
@@ -186,6 +186,7 @@ jobs:
           
       - uses: softprops/action-gh-release@v2
         with:
+          name: DMA ${{ needs.meta.outputs.tag }}
           files: assets/*
           tag_name: ${{ needs.meta.outputs.tag }}
           body: ${{ needs.changelog.outputs.release_body }}
