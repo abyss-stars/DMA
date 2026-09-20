@@ -6,7 +6,7 @@
     "interface_version": 2,
     "name": "DMA",
     "description": "用于DNA的自动软件",
-    "contact": "QQ群: 123456789",
+    "contact": "QQ:2359933809",
     "license": "MIT",
     "welcome": "首次使用！欢迎使用 DMA!",
     // 填写项目地址和版本号可实现自动更新功能
@@ -61,7 +61,8 @@
     "task": [
         {
             "name": "深渊循环",
-            "entry": "AbyssMainLoop"
+            "entry": "AbyssMainLoop",
+            "description": "用于处于深渊重试或者下一层界面时的无限自动刷取深渊代币"
         }
     ]
 }
