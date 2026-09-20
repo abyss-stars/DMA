@@ -61,7 +61,7 @@
     "task": [
         {
             "name": "深渊循环",
-            "entry": "深渊主循环"
+            "entry": "AbyssMainLoop"
         }
     ]
 }
