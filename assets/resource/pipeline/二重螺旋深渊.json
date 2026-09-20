@@ -1,15 +1,15 @@
 {
-    "深渊主循环": {
+    "AbyssMainLoop": {
         "timeout": -1,
         "rate_limit": 2000,
         "next": [
-            "深渊下一层",
-            "深渊开始挑战",
-            "深渊长移动",
-            "深渊重新开始"
+            "AbyssNextFloor",
+            "AbyssStart",
+            "AbyssLongMove",
+            "AbyssRestart"
         ]
     },
-    "深渊下一层": {
+    "AbyssNextFloor": {
         "recognition": "TemplateMatch",
         "template": "abyss/nextfloor.png",
         "roi": [
@@ -23,13 +23,13 @@
         "post_delay": 0,
         "timeout": 40000,
         "on_error": [
-            "深渊主循环"
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊长移动"
+            "AbyssLongMove"
         ]
     },
-    "深渊重新开始": {
+    "AbyssRestart": {
         "recognition": "TemplateMatch",
         "template": "abyss/restart.png",
         "action": "Click",
@@ -37,13 +37,13 @@
         "post_delay": 0,
         "timeout": 40000,
         "on_error": [
-            "深渊主循环"
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊长移动"
+            "AbyssLongMove"
         ]
     },
-    "深渊长移动": {
+    "AbyssLongMove": {
         "recognition": "TemplateMatch",
         "template": "abyss/start.png",
         "roi": [
@@ -70,15 +70,15 @@
         "post_delay": 300,
         "timeout": 6000,
         "on_error": [
-            "深渊进入战斗",
-            "深渊微调",
-            "深渊主循环"
+            "AbyssAttack",
+            "AbyssFineTuning",
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊开始挑战"
+            "AbyssStart"
         ]
     },
-    "深渊微调": {
+    "AbyssFineTuning": {
         "recognition": "TemplateMatch",
         "template": "abyss/start.png",
         "roi": [
@@ -95,7 +95,7 @@
             18
         ],
         "end": [
-            240,
+            235,
             495,
             23,
             13
@@ -106,15 +106,15 @@
         "rate_limit": 500,
         "timeout": 4000,
         "on_error": [
-            "深渊进入战斗",
-            "深渊微调",
-            "深渊主循环"
+            "AbyssAttack",
+            "AbyssFineTuning",
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊开始挑战"
+            "AbyssStart"
         ]
     },
-    "深渊开始挑战": {
+    "AbyssStart": {
         "recognition": "TemplateMatch",
         "template": "abyss/开始深渊.png",
         "roi": [
@@ -128,13 +128,13 @@
         "post_delay": 0,
         "timeout": 20000,
         "on_error": [
-            "深渊主循环"
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊进入战斗"
+            "AbyssAttack"
         ]
     },
-    "深渊进入战斗": {
+    "AbyssAttack": {
         "recognition": "TemplateMatch",
         "template": "abyss/start.png",
         "roi": [
@@ -148,13 +148,13 @@
         "post_delay": 500,
         "timeout": 30000,
         "on_error": [
-            "深渊主循环"
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊开大"
+            "qSkill"
         ]
     },
-    "深渊开大": {
+    "qSkill": { 
         "recognition": "TemplateMatch",
         "template": "abyss/skill/艾达大招.png",
         "roi": [
@@ -168,13 +168,13 @@
         "post_delay": 0,
         "timeout": 30000,
         "on_error": [
-            "深渊主循环"
+            "AbyssMainLoop"
         ],
         "next": [
-            "深渊小技能"
+            "eSkill"
         ]
     },
-    "深渊小技能": {
+    "eSkill": {
         "recognition": "TemplateMatch",
         "template": "abyss/skill/艾达e技能.png",
         "roi": [
@@ -188,7 +188,7 @@
         "post_delay": 0,
         "timeout": 30000,
         "next": [
-            "深渊主循环"
+            "AbyssMainLoop"
         ]
     }
 }
