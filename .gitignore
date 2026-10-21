@@ -412,12 +412,11 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
+# 本仓库的 .vscode 全部为个人配置，不入库（settings.json / tasks.json / extensions.json
+# 都只留在本机；需要参考内容见 AGENTS.md §9）
 **/.vscode/*
 .vscode/*
-!.vscode/settings.json
-.vscode/tasks.json
 # !.vscode/launch.json
-!.vscode/extensions.json
 *.code-workspace
 
 # Local History for Visual Studio Code
