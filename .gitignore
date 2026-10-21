@@ -453,3 +453,9 @@ tools/ImageCropper/**/*.png
 config
 debug
 AGENTS.md
+
+# MaaFramework 官方文档本地只读副本（见 AGENTS.md §5）
+# 上游文件名统一以数字序号开头，NodeJS/ 为其子目录；本仓库自己的
+# docs/zh_cn/develop/*.md（agent.md / faq.md 等）不受影响，仍需正常提交。
+docs/zh_cn/develop/[0-9]*
+docs/zh_cn/develop/NodeJS/
