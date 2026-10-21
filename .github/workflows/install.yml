@@ -5,12 +5,13 @@ env:
   # - 空字符串 = 下载 latest 版本（不推荐）
   # - 具体版本号 = 下载指定版本
   #
-  # 当前值 = v1.0.0 ~ v1.0.3 实际构建所用的版本，可从对应 Actions 日志核实：
-  #   Downloading file: MAA-win-x86_64-v5.13.1.zip
-  #   Downloading file: MFAAvalonia-v2.16.1-win-x64.zip
+  # 变更历史（追溯「某个发版用的是哪版框架」）：
+  #   v1.0.0 ~ v1.0.3  实际构建用 v5.13.1 + MFAAvalonia v2.16.1（当时此处为空 → 取 latest）
+  #   2026-10-21       显式 pin 为上述版本（commit d911900）
+  #   2026-10-21       升级到 v5.14.3（schema 同步取自同名 tag）
   # 升级时四处一起改：这里 + deps/tools/*.schema.json + maatools.config.mts 的 maaVersion
   # + 本机 deps/ 里的二进制（deps 不进 git，需按同一版本重新下载）。
-  MAAFW_VERSION: "v5.13.1"
+  MAAFW_VERSION: "v5.14.3"
   MFAA_VERSION: "v2.16.1"
 
 on:
