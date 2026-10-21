@@ -2,21 +2,19 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "装配 install（v1.0.4-dev）",
-            "detail": "把 assets/resource、interface.json、agent/ 覆盖进 install/（不联网，约 0.2 秒）",
+            "label": "装配 install（版本取 git describe）",
+            "detail": "版本号自动取 git describe（如 v1.0.3-9-g9476aca，带未提交改动时加 -dirty），永远不会过期；只影响界面显示",
             "type": "shell",
-            "command": "python",
+            "command": "powershell",
             "args": [
-                "tools/install.py",
-                "v1.0.4-dev",
-                "win",
-                "x86_64"
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "tools/dev_install.ps1"
             ],
             "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "PYTHONIOENCODING": "utf-8"
-                }
+                "cwd": "${workspaceFolder}"
             },
             "group": {
                 "kind": "build",
@@ -30,21 +28,21 @@
             "problemMatcher": []
         },
         {
-            "label": "装配 install（选择版本）",
-            "detail": "同上，但先用下拉框选版本号（只影响界面显示）",
+            "label": "装配 install（指定版本）",
+            "detail": "手动指定版本号（只影响界面显示，不参与构建）",
             "type": "shell",
-            "command": "python",
+            "command": "powershell",
             "args": [
-                "tools/install.py",
-                "${input:installVersion}",
-                "win",
-                "x86_64"
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "tools/dev_install.ps1",
+                "-Version",
+                "${input:installVersion}"
             ],
             "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "PYTHONIOENCODING": "utf-8"
-                }
+                "cwd": "${workspaceFolder}"
             },
             "presentation": {
                 "reveal": "always",
@@ -55,7 +53,7 @@
         },
         {
             "label": "同步 pipeline（仅 JSON）",
-            "detail": "只改 pipeline 时用它，比整包装配快；改了图片或 interface.json 请改跑「装配 install」",
+            "detail": "只改 pipeline 时用它，比整包装配快；改了图片或 interface.json 请改跑装配任务",
             "type": "process",
             "command": "powershell",
             "args": [
@@ -96,7 +94,7 @@
             "detail": "日常回路：改完 assets → 装配 → 重启 GUI",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "装配 install（v1.0.4-dev）",
+                "装配 install（版本取 git describe）",
                 "启动 GUI（install/DMA.exe）"
             ],
             "problemMatcher": []
@@ -156,7 +154,7 @@
             "dependsOn": [
                 "校验：schema",
                 "校验：maa-tools check",
-                "装配 install（v1.0.4-dev）",
+                "装配 install（版本取 git describe）",
                 "启动 GUI（install/DMA.exe）"
             ],
             "problemMatcher": []
