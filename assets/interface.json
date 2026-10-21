@@ -58,10 +58,58 @@
     //         "./agent/main.py"
     //     ]
     // },
+    // 任务可选项：通用 UI 会据此渲染下拉框
+    // 文档: https://maafw.xyz/docs/3.3-ProjectInterfaceV2
+    "option": {
+        "挂机角色": {
+            "type": "select",
+            "label": "挂机角色",
+            "description": "选择自动战斗时使用的角色技能模板",
+            "default_case": "艾达挂机",
+            "cases": [
+                {
+                    "name": "艾达挂机",
+                    "label": "艾达挂机",
+                    // 艾达：大招 + E 技能都识别（与 pipeline 默认值一致，显式写出便于对照）
+                    "pipeline_override": {
+                        "qSkill": {
+                            "template": "abyss/skill/艾达大招.png",
+                            "next": [
+                                "eSkill"
+                            ]
+                        },
+                        "eSkill": {
+                            "template": "abyss/skill/艾达e技能.png",
+                            "enabled": true
+                        }
+                    }
+                },
+                {
+                    "name": "芙罗拉挂机",
+                    "label": "芙罗拉挂机",
+                    // 芙罗拉：只放大招；暂无可用的 E 技能模板，故跳过 eSkill 直接回主循环
+                    "pipeline_override": {
+                        "qSkill": {
+                            "template": "abyss/skill/fll大招.png",
+                            "next": [
+                                "AbyssMainLoop"
+                            ]
+                        },
+                        "eSkill": {
+                            "enabled": false
+                        }
+                    }
+                }
+            ]
+        }
+    },
     "task": [
         {
             "name": "深渊循环",
             "entry": "AbyssMainLoop",
+            "option": [
+                "挂机角色"
+            ],
             "description": "用于处于深渊重试或者下一层界面时的无限自动刷取深渊代币"
         }
     ]
