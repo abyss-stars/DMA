@@ -1,0 +1,131 @@
+{
+    // 从主界面进入深渊的导航链（不含战斗循环，循环见 abyssLoop.json）
+    "GotoAbyss": {
+        "next": [
+            "[JumpBack]BackMainMenu",
+            "[JumpBack]ClickMenu",
+            "[JumpBack]ClickExperience",
+            "[JumpBack]ClickList4",
+            "[JumpBack]AbyssEntry",
+            "EnterAbyss"
+        ]
+    },
+    "ClickMenu": {
+        "recognition": "TemplateMatch",
+        "template": "main/menu.png",
+        "roi": [
+            37,
+            21,
+            32,
+            27
+        ],
+        "action": "Click"
+    },
+    "ClickExperience": {
+        "recognition": "TemplateMatch",
+        "template": "main/experience.png",
+        "roi": [
+            140,
+            509,
+            102,
+            101
+        ],
+        "action": "Click"
+    },
+    "ClickList4": {
+        "recognition": "TemplateMatch",
+        "template": "enterAbyss/tab.png",
+        "roi": [
+            32,
+            335,
+            49,
+            52
+        ],
+        "action": "Click"
+    },
+    "AbyssEntry": {
+        "recognition": "TemplateMatch",
+        "template": "enterAbyss/entry.png",
+        "roi": [
+            663,561,207,108
+        ],
+        "action": "Click"
+    },
+    "EnterAbyss": {
+        "recognition": "TemplateMatch",
+        "template": "enterAbyss/goto.png",
+        "roi": [
+            972,
+            485,
+            241,
+            46
+        ],
+        "action": "Click"
+    },
+    "EnterSelectAbyss": {
+        "recognition": "OCR",
+        "expected": [
+            "不朽剧目"
+        ],
+        "roi": [
+            73, 291, 190, 259
+        ],
+        "action": "Click",
+        "next": [
+            "FindImmortal"
+        ]
+    },
+    "FindImmortal": {
+        "desc": "在剧目列表里滚动直到看到目标条目",
+        "rate_limit": 300,
+        "timeout": 6000,                 // 滚不到就放弃（见下面 on_error）
+        "on_error": [
+            "BackMainMenu"
+        ],
+        "next": [
+            "ClickImmortalButton", "MoveDown"
+        ]
+    },
+    "ClickImmortalButton": {
+        "recognition": "TemplateMatch",
+        "template": "abyss/stars.png",
+        "roi": [
+            764, 117, 452, 532
+        ],
+        "action": "Click",
+        "next": [
+            "Goin"
+        ]
+    },
+    "MoveDown": {
+        "recognition": "TemplateMatch",
+        "template": "abyss/stars.png",
+        "roi": [
+            764, 117, 452, 532
+            ],     // 补 roi，别全屏扫
+        "inverse": true,                 // 没看到就滑
+        "action": "Swipe",
+        "begin": [
+            982, 559, 38, 30
+        ],
+        "end": [
+            974, 156, 48, 32
+        ],
+        "duration": 400,
+        "post_delay": 400,
+        "next": [
+            "FindImmortal"
+            ]         // 回循环，而不是单程票
+    },
+    "Goin":{
+        "recognition": "OCR",
+        "expected": "前往",
+        "roi": [
+            1080,654,163,55
+        ],
+        "action": "Click",
+        "next": [
+            "AbyssMainLoop"
+        ]
+    }
+}

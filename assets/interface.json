@@ -61,6 +61,22 @@
     // 任务可选项：通用 UI 会据此渲染下拉框
     // 文档: https://maafw.xyz/docs/3.3-ProjectInterfaceV2
     "option": {
+        "刷取选择":{
+            "type": "select",
+            "label": "选择深渊刷取位置",
+            "default_case": "拿完整密函",
+            "description": "选择只是拿完整角色密函还是无尽刷取深渊",
+            "cases": [
+                {
+                    "name": "拿完整密函",
+                    "description": "刷取到前12层深渊"
+                },
+                {
+                    "name": "无尽刷取",
+                    "description": "重复刷取"
+                }
+            ]
+        },
         "挂机角色": {
             "type": "select",
             "label": "挂机角色",
@@ -105,12 +121,17 @@
     },
     "task": [
         {
-            "name": "深渊循环",
-            "entry": "AbyssMainLoop",
+            "name": "深渊刷取",
+            "entry": "GotoAbyss",
             "option": [
-                "挂机角色"
+                "挂机角色",
+                "刷取选择"
             ],
-            "description": "用于处于深渊重试或者下一层界面时的无限自动刷取深渊代币"
+            "description": "用于刷取深渊代币和密函"
+        },
+        {
+            "name": "回到主界面",
+            "entry": "BackMainMenu"
         }
     ]
 }

@@ -1,11 +1,12 @@
 {
+    // 深渊内的无限循环（进入导航见 enterAbyss.json）
     "AbyssMainLoop": {
         "timeout": -1,
         "rate_limit": 2000,
         "next": [
-            "AbyssNextFloor",
             "AbyssStart",
             "AbyssLongMove",
+            "AbyssNextFloor",
             "AbyssRestart"
         ]
     },
@@ -154,7 +155,7 @@
             "qSkill"
         ]
     },
-    "qSkill": { 
+    "qSkill": {
         "recognition": "TemplateMatch",
         "template": "abyss/skill/艾达大招.png",
         "roi": [

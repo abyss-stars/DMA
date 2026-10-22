@@ -6,28 +6,28 @@
             "[JumpBack]ClickBackButton",
             "[JumpBack]ClickCancelButton",
             "[JumpBack]ClickCancelButton2",
-            "[JumpBack]ClickBlank"
+            "ClickBlank"
         ]
     },
     "ClickBackButton": {
         "recognition": "TemplateMatch",
-        "template": "backButton.png",
+        "template": "common/backButton.png",
         "roi": [
-           1,
-           11,
-           160,
-           93
+            1,
+            11,
+            160,
+            93
         ],
         "action": "Click"
     },
     "ClickCancelButton": { //没有roi是因为取消按钮位置不定
         "recognition": "TemplateMatch",
-        "template": "cancelButton.png",
+        "template": "common/cancelButton.png",
         "action": "Click"
     },
     "ClickCancelButton2": {
         "recognition": "TemplateMatch",
-        "template": "cancelButton2.png",
+        "template": "common/cancelButton2.png",
         "action": "Click"
     },
     "ClickBlank": {
