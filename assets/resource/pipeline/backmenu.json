@@ -1,0 +1,43 @@
+{
+    "BackMainMenu": {
+        "desc": "回到主界面(任务前使用)",
+        "max_hit": 2,
+        "next": [
+            "[JumpBack]ClickBackButton",
+            "[JumpBack]ClickCancelButton",
+            "[JumpBack]ClickCancelButton2",
+            "[JumpBack]ClickBlank"
+        ]
+    },
+    "ClickBackButton": {
+        "recognition": "TemplateMatch",
+        "template": "backButton.png",
+        "roi": [
+           1,
+           11,
+           160,
+           93
+        ],
+        "action": "Click"
+    },
+    "ClickCancelButton": { //没有roi是因为取消按钮位置不定
+        "recognition": "TemplateMatch",
+        "template": "cancelButton.png",
+        "action": "Click"
+    },
+    "ClickCancelButton2": {
+        "recognition": "TemplateMatch",
+        "template": "cancelButton2.png",
+        "action": "Click"
+    },
+    "ClickBlank": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            1106,
+            57,
+            63,
+            35
+        ]
+    }
+}
