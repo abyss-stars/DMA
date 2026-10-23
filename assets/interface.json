@@ -51,13 +51,14 @@
             ]
         }
     ],
-    // 可选的 agent 示例
-    // "agent": {
-    //     "child_exec": "python",
-    //     "child_args": [
-    //         "./agent/main.py"
-    //     ]
-    // },
+    // AgentServer（Python 自定义动作/识别）
+    // 文档: https://maafw.xyz/docs/1.3-Custom&Agent
+    "agent": {
+        "child_exec": "python",
+        "child_args": [
+            "./agent/main.py"
+        ]
+    },
     // 任务可选项：通用 UI 会据此渲染下拉框
     // 文档: https://maafw.xyz/docs/3.3-ProjectInterfaceV2
     "option": {

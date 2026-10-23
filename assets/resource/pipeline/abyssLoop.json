@@ -5,7 +5,7 @@
         "rate_limit": 2000,
         "next": [
             "AbyssStart",
-            "AbyssLongMove",
+            "AbyssAlign",
             "AbyssNextFloor",
             "AbyssRestart"
         ]
@@ -27,7 +27,7 @@
             "AbyssMainLoop"
         ],
         "next": [
-            "AbyssLongMove"
+            "AbyssAlign"
         ]
     },
     "AbyssRestart": {
@@ -41,10 +41,11 @@
             "AbyssMainLoop"
         ],
         "next": [
-            "AbyssLongMove"
+            "AbyssAlign"
         ]
     },
-    "AbyssLongMove": {
+    "AbyssAlign": {
+        "desc": "长移→微调→检查「开始深渊」；失败则异常退出+重开并按 end.x 逐档重试（Python: abyss_align）",
         "recognition": "TemplateMatch",
         "template": "abyss/start.png",
         "roi": [
@@ -53,62 +54,45 @@
             218,
             63
         ],
-        "action": "Swipe",
-        "begin": [
-            207,
-            529,
-            22,
-            18
-        ],
-        "end": [
-            285,
-            455,
-            15,
-            12
-        ],
-        "duration": 1600,
+        "action": "Custom",
+        "custom_action": "abyss_align",
+        "custom_action_param": {
+            "begin": [
+                207,
+                529,
+                22,
+                18
+            ],
+            "end": [
+                285,
+                455,
+                15,
+                12
+            ],
+            "step": 10,
+            "tries": 5,
+            "duration": 1600,
+            "fine": {
+                "begin": [
+                    207,
+                    529,
+                    22,
+                    18
+                ],
+                "end": [
+                    235,
+                    495,
+                    23,
+                    13
+                ],
+                "duration": 160
+            },
+            "settle": 1.0
+        },
         "pre_delay": 0,
-        "post_delay": 300,
+        "post_delay": 0,
         "timeout": 6000,
         "on_error": [
-            "AbyssAttack",
-            "AbyssFineTuning",
-            "AbyssMainLoop"
-        ],
-        "next": [
-            "AbyssStart"
-        ]
-    },
-    "AbyssFineTuning": {
-        "recognition": "TemplateMatch",
-        "template": "abyss/start.png",
-        "roi": [
-            58,
-            238,
-            218,
-            63
-        ],
-        "action": "Swipe",
-        "begin": [
-            207,
-            529,
-            22,
-            18
-        ],
-        "end": [
-            235,
-            495,
-            23,
-            13
-        ],
-        "duration": 160,
-        "pre_delay": 0,
-        "post_delay": 300,
-        "rate_limit": 500,
-        "timeout": 4000,
-        "on_error": [
-            "AbyssAttack",
-            "AbyssFineTuning",
             "AbyssMainLoop"
         ],
         "next": [
@@ -192,23 +176,27 @@
             "AbyssMainLoop"
         ]
     },
-    "ErrorExit":{
-        "desc": "关卡异常重开",
+    "ErrorExit": {
+        "desc": "关卡异常退出按钮（仅作为 abyss_align 的识别目标，不参与流程）",
         "recognition": "TemplateMatch",
         "template": "common/errorexit.png",
         "roi": [
-            12,6,80,59
+            12,
+            6,
+            80,
+            59
         ],
-        "action": "Click",
-        "next": [
-            "ClickRestart"
-        ]
+        "action": "Click"
     },
-    "ClickRestart":{
+    "ClickRestart": {
+        "desc": "重开本次深渊按钮（仅作为 abyss_align 的识别目标，不参与流程）",
         "recognition": "TemplateMatch",
         "template": "common/restart.png",
         "roi": [
-            988,602,116,84
+            988,
+            602,
+            116,
+            84
         ],
         "action": "Click"
     }

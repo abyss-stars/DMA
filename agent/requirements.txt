@@ -1,0 +1,4 @@
+# AgentServer（Python）依赖
+# 版本须与 .github/workflows/install.yml 的 MAAFW_VERSION 保持一致
+# 安装：pip install -r agent/requirements.txt
+MaaFw==5.14.3
