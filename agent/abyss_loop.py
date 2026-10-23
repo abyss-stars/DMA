@@ -5,6 +5,7 @@ import time
 from maa.agent.agent_server import AgentServer
 from maa.context import Context
 from maa.custom_action import CustomAction
+from maa.pipeline import JWaitFreezes
 
 
 @AgentServer.custom_action("click_target")
@@ -31,7 +32,7 @@ class ClickTargetAction(CustomAction):
 
 
 def _point(box) -> tuple[int, int]:
-    """[x, y] 原样返回；[x, y, w, h] 返回框内一点（靠近中心概率更高）。"""
+    """[x, y] 原样返回；[x, y, w, h] 返回框内一点（靠近中心概率更高，与 pipeline Swipe 行为一致）。"""
     if len(box) == 2:
         return int(box[0]), int(box[1])
 
@@ -43,88 +44,199 @@ def _point(box) -> tuple[int, int]:
     return int(px), int(py)
 
 
-def _center(box) -> tuple[int, int]:
-    x, y, w, h = (int(v) for v in box)
-    return x + w // 2, y + h // 2
-
-
 @AgentServer.custom_action("abyss_align")
 class AbyssAlignAction(CustomAction):
-    """深渊入场对齐：长移（end.x 逐档 +step）→ 微调 → 检查「开始深渊」。
+    """开启深渊：抬视角 → 右转对准入口图标 → 前进，直到看到「开始深渊」。
 
-    没看到「开始深渊」就点「异常退出」→「重开」，回到准备界面后用下一档 end.x 再试。
-    任意一档成功即返回 True，由 pipeline 的 next 继续点「开始深渊」走正常流程。
+    流程（对应 assets/resource/pipeline/test.json 里验证过的写法）：
+       1. MoveViewUp  ×times   —— 把视角抬到能看见入口指示
+       2. MoveViewRight 反复    —— 直到 [icon_roi] 内识别到指令图标
+       3. MoveForward  duration —— 持续前进（约 2s）
+       4. 未见「开始深渊」则每次 MoveForward 0.5s 再查，直到看到或用尽次数
+
+    参数全部来自 custom_action_param，改轨迹不用动代码。
     """
 
-    def _recognize(self, context: Context, name: str, timeout: float):
-        """截图并在 timeout 秒内反复识别 name，命中返回 detail，否则返回 None。"""
-        ctrl = context.tasker.controller
+    # region 基础动作
+
+    def _settle(self, context: Context, cfg: dict, default: int = 300) -> None:
+        """等画面静止 settle 毫秒；静止判定失败时退回固定等待。
+
+        settle 语义 = “画面至少静止这么久”，长滑之后自动多等，短滑之后不浪费时间。
+        target 显式给全屏 (0,0,0,0)，因为自定义动作里没有“本节点识别到的位置”，
+        让它走 target=true（自身）会退化成未定义行为。
+        """
+        ms = int(cfg.get("settle", default))
+        if ms <= 0:
+            return
+        target = tuple(cfg.get("freeze_target", (0, 0, 0, 0)))
+        param = JWaitFreezes(
+            time=ms,
+            target=target,
+            threshold=float(cfg.get("freeze_threshold", 0.95)),
+            timeout=max(ms * 3, 1000),
+        )
+        if not context.wait_freezes(box=target, wait_freezes_param=param):
+            time.sleep(ms / 1000)
+
+    def _swipe(self, context: Context, begin, end, duration: int) -> None:
+        bx, by = _point(begin)
+        ex, ey = _point(end)
+        context.tasker.controller.post_swipe(bx, by, ex, ey, duration).wait()
+
+    def _move_view_up(self, context: Context, cfg: dict) -> None:
+        times = int(cfg.get("times", 5))
+        delay = int(cfg.get("delay", 300)) / 1000
+        for i in range(times):
+            self._swipe(context, cfg["begin"], cfg["end"], int(cfg.get("duration", 300)))
+            if i + 1 < times:
+                time.sleep(delay)
+        print(f"[abyss_align] 抬视角 ×{times}", flush=True)
+
+    def _move_view_right(self, context: Context, cfg: dict) -> None:
+        self._swipe(context, cfg["begin"], cfg["end"], int(cfg.get("duration", 300)))
+        self._settle(context, cfg, 300)
+
+    def _move_forward(self, context: Context, begin, end, duration: int) -> None:
+        self._swipe(context, begin, end, duration)
+
+    def _find(self, context: Context, node: str):
+        """截图并识别 node，命中返回 detail，否则返回 None。"""
+        image = context.tasker.controller.post_screencap().wait().get()
+        detail = context.run_recognition(node, image)
+        if detail is not None and detail.hit:
+            return detail
+        return None
+
+    def _wait_for(self, context: Context, node: str, timeout: float):
+        """在 timeout 秒内反复识别 node，命中返回 detail。"""
         deadline = time.time() + timeout
         while True:
-            image = ctrl.post_screencap().wait().get()
-            detail = context.run_recognition(name, image)
-            if detail is not None and detail.hit:
+            detail = self._find(context, node)
+            if detail is not None and detail.box is not None:
                 return detail
             if time.time() >= deadline:
                 return None
             time.sleep(0.3)
 
-    def _swipe(self, context: Context, begin, end, duration: int, randomize_end: bool = False):
-        bx, by = _point(begin)
-        # 终点必须是确定点：阶梯靠 end.x + step 递进，随机化会让档位失去意义
-        ex, ey = _point(end) if randomize_end else _center(end)
-        context.tasker.controller.post_swipe(bx, by, ex, ey, duration).wait()
+    def _see(self, context: Context, node: str) -> bool:
+        return self._find(context, node) is not None
+
+    # endregion
+
+    # region 重开
+
+    def _restart(self, context: Context, cfg: dict) -> bool:
+        """重开本次深渊：先点 ErrorExit（异常退出），再点 ClickRestart（重新开始）。
+
+        两步都必须走 Context API（AgentServer 下 controller.post_click 会崩）。
+        弹窗出现需要时间，所以用 _wait_for 轮询，而不是死等固定时长。
+        """
+        exit_node = cfg.get("exit_node", "ErrorExit")
+        restart_node = cfg.get("restart_node", "ClickRestart")
+        ready_node = cfg.get("ready_node", "AbyssAlign")
+        dialog_timeout = float(cfg.get("dialog_timeout", 5))
+
+        detail = self._wait_for(context, exit_node, 2.0)
+        if detail is None:
+            print(f"[abyss_align] 未找到 {exit_node}，无法重开", flush=True)
+            return False
+        context.run_action(exit_node, detail.box)
+
+        detail = self._wait_for(context, restart_node, dialog_timeout)
+        if detail is None:
+            print(f"[abyss_align] 未等到 {restart_node}（退出弹窗未出现）", flush=True)
+            return False
+        context.run_action(restart_node, detail.box)
+        print(f"[abyss_align] 已调用 {exit_node} → {restart_node} 重开", flush=True)
+
+        deadline = time.time() + float(cfg.get("ready_timeout", 15))
+        while time.time() < deadline:
+            time.sleep(0.5)
+            if self._see(context, ready_node):
+                print("[abyss_align] 重开完成，已回到准备界面", flush=True)
+                return True
+        print("[abyss_align] 重开等待超时，继续尝试", flush=True)
+        return True
+
+    # endregion
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 任何异常都显式返回 False：ctypes 回调会吞异常，若不拦会被框架当成“动作成功”
+        try:
+            return self._run(context, argv)
+        except Exception as exc:
+            print(f"[abyss_align] 异常终止: {exc!r}", flush=True)
+            return False
+
+    def _run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         param = json.loads(argv.custom_action_param or "{}")
-        begin = param.get("begin", [207, 529, 22, 18])
-        end = param.get("end", [285, 455, 15, 12])
-        step = int(param.get("step", 10))
-        tries = int(param.get("tries", 5))
-        duration = int(param.get("duration", 1600))
-        settle = float(param.get("settle", 1.0))
-        fine = param.get("fine", {})
+        restart = param.get("restart") or {}
+        max_restarts = int(restart.get("max_times", 0)) if restart.get("enabled", True) else 0
 
-        base_x, base_y = int(end[0]), int(end[1])
-        end_tail = [int(v) for v in end[2:]] or [1, 1]
-        ctrl = context.tasker.controller
-
-        for i in range(tries):
-            end_x = base_x + i * step
-            self._swipe(context, begin, [end_x, base_y, *end_tail], duration)
-            if fine:
-                self._swipe(
-                    context,
-                    fine.get("begin", begin),
-                    fine.get("end", end),
-                    int(fine.get("duration", 160)),
-                )
-
-            time.sleep(settle)
-            if self._recognize(context, "AbyssStart", 0.5):
-                print(f"[abyss_align] 第 {i + 1} 档 end.x={end_x} 成功", flush=True)
+        # 首次尝试 + 每次失败后重开再来一轮
+        for attempt in range(max_restarts + 1):
+            if self._align_once(context, param):
                 return True
-
-            print(f"[abyss_align] 第 {i + 1} 档 end.x={end_x} 失败，重开", flush=True)
-
-            detail = self._recognize(context, "ErrorExit", 2.0)
-            if detail is None or detail.box is None:
-                print("[abyss_align] 未找到异常退出按钮，放弃", flush=True)
+            if attempt < max_restarts:
+                print(f"[abyss_align] 第 {attempt + 1} 轮对齐失败，重开本次深渊", flush=True)
+                if not self._restart(context, restart):
+                    return False
+            else:
+                print(f"[abyss_align] 已重开 {max_restarts} 次仍未开启，放弃", flush=True)
                 return False
-            ctrl.post_click(*_center(detail.box)).wait()
-            time.sleep(settle)
-
-            detail = self._recognize(context, "ClickRestart", 5.0)
-            if detail is None or detail.box is None:
-                print("[abyss_align] 未找到重开按钮，放弃", flush=True)
-                return False
-            ctrl.post_click(*_center(detail.box)).wait()
-
-            # 等重开回到准备界面（摇杆出现）
-            if self._recognize(context, "AbyssAlign", 10.0) is None:
-                print("[abyss_align] 重开后未回到准备界面，放弃", flush=True)
-                return False
-
-        print(f"[abyss_align] {tries} 档全部失败", flush=True)
         return False
 
+    def _align_once(self, context: Context, param: dict) -> bool:
+        """一轮完整对齐：抬视角 → 右转对准 → 前进 → 微调若干次。"""
+        view_up = param.get("view_up", {})
+        view_right = param.get("view_right", {})
+        forward = param.get("forward", {})
+        step = param.get("step", {})
+        icon_node = param.get("icon", "InstructionIcon")
+        target_node = param.get("target", "AbyssStart")
+
+        # 0. 已经能看到「开始深渊」就别动（重试/重开后已在按钮前的情况）
+        if self._see(context, target_node):
+            print("[abyss_align] 已看到「开始深渊」，无需移动", flush=True)
+            return True
+
+        # 1. 抬视角
+        if view_up:
+            self._move_view_up(context, view_up)
+
+        # 2. 右转直到看到入口图标
+        max_right = int(view_right.get("max_times", 45))
+        aligned = False
+        for i in range(max_right):
+            if self._see(context, icon_node):
+                aligned = True
+                print(f"[abyss_align] 右转 {i} 次后看到入口图标", flush=True)
+                break
+            self._move_view_right(context, view_right)
+        if not aligned:
+            print(f"[abyss_align] 右转 {max_right} 次仍未看到入口图标，继续前进", flush=True)
+
+        # 3. 前进约 1.5s
+        fw_begin = forward.get("begin", [208, 533])
+        fw_end = forward.get("end", [230, 440])
+        if forward:
+            self._move_forward(context, fw_begin, fw_end, int(forward.get("duration", 1500)))
+            self._settle(context, forward, 300)
+
+        # 4. 未见「开始深渊」就每次前进一小步再查（复用 forward 的坐标）
+        if self._see(context, target_node):
+            print("[abyss_align] 已看到「开始深渊」", flush=True)
+            return True
+
+        st_duration = int(step.get("duration", 200))
+        max_step = int(step.get("max_times", 5))
+        for i in range(max_step):
+            self._move_forward(context, fw_begin, fw_end, st_duration)
+            self._settle(context, step, 200)
+            if self._see(context, target_node):
+                print(f"[abyss_align] 前进 {i + 1} 小步后看到「开始深渊」", flush=True)
+                return True
+
+        print(f"[abyss_align] 微调 {max_step} 次仍未看到「开始深渊」", flush=True)
+        return False

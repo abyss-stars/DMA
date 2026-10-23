@@ -135,7 +135,7 @@
         },
         {
             "name": "test",
-            "entry": "AbyssMainLoop"
+            "entry": "TestEntry"
         }
     ]
 }

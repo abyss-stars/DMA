@@ -45,7 +45,7 @@
         ]
     },
     "AbyssAlign": {
-        "desc": "长移→微调→检查「开始深渊」；失败则异常退出+重开并按 end.x 逐档重试（Python: abyss_align）",
+        "desc": "开启深渊：抬视角×5 → 右转对准 instruction_icon → 前进1.5s → 微调5次仍未见「开始深渊」则 ErrorExit+ClickRestart 重开（最多2次）（Python: abyss_align）",
         "recognition": "TemplateMatch",
         "template": "abyss/start.png",
         "roi": [
@@ -57,37 +57,71 @@
         "action": "Custom",
         "custom_action": "abyss_align",
         "custom_action_param": {
-            "begin": [
-                207,
-                529,
-                22,
-                18
-            ],
-            "end": [
-                285,
-                455,
-                15,
-                12
-            ],
-            "step": 10,
-            "tries": 5,
-            "duration": 1600,
-            "fine": {
+            // 1) 抬视角 ×5（对应 MoveViewUp）
+            "view_up": {
                 "begin": [
-                    207,
-                    529,
-                    22,
-                    18
+                    550,
+                    140,
+                    63,
+                    41
                 ],
                 "end": [
-                    235,
-                    495,
-                    23,
-                    13
+                    550,
+                    53,
+                    64,
+                    36
                 ],
-                "duration": 160
+                "duration": 300,
+                "times": 5,
+                "delay": 300
             },
-            "settle": 1.0
+            // 2) 右转小步直到在 icon 的 roi 内看到指示图标（对应 MoveViewRight）
+            "view_right": {
+                "begin": [
+                    461,
+                    61
+                ],
+                "end": [
+                    500,
+                    61
+                ],
+                "duration": 300,
+                // 画面至少静止这么久（agent 用 wait_freezes，失败退回固定等待）
+                "settle": 300,
+                "max_times": 45
+            },
+            "icon": "InstructionIcon",
+            // 3) 前进：只需要 x,y 两个点（对应 MoveForward）
+            "forward": {
+                "begin": [
+                    208,
+                    533
+                ],
+                "end": [
+                    220,
+                    440
+                ],
+                "duration": 1500,
+                "settle": 300
+            },
+            // 4) 未见「开始深渊」时每次前进一小步，坐标复用 forward（对应 MoveForwardShort）
+            "step": {
+                "duration": 200,
+                // 小步之后等画面静止的时间
+                "settle": 200,
+                "max_times": 5
+            },
+            // 5) 微调 5 次仍未成功 → ErrorExit + ClickRestart 重开本次深渊，再完整跑一轮
+            "restart": {
+                "enabled": true,
+                "max_times": 2,
+                "exit_node": "ErrorExit",
+                "restart_node": "ClickRestart",
+                "dialog_timeout": 5,
+                "ready_node": "AbyssAlign",
+                "ready_timeout": 15
+            },
+            "target": "AbyssStart"
         },
         "pre_delay": 0,
         "post_delay": 0,
@@ -176,8 +210,20 @@
             "AbyssMainLoop"
         ]
     },
+    "InstructionIcon": {
+        "desc": "指向深渊入口的 instruction_icon（仅作为 abyss_align 的识别目标，不参与流程）",
+        "recognition": "TemplateMatch",
+        "template": "common/instruction_icon.png",
+        "roi": [
+            608,
+            497,
+            66,
+            52
+        ],
+        "action": "DoNothing"
+    },
     "ErrorExit": {
-        "desc": "关卡异常退出按钮（仅作为 abyss_align 的识别目标，不参与流程）",
+        "desc": "关卡异常退出按钮（当前流程未使用，保留供后续死亡重试）",
         "recognition": "TemplateMatch",
         "template": "common/errorexit.png",
         "roi": [
@@ -186,10 +232,13 @@
             80,
             59
         ],
-        "action": "Click"
+        "action": "Click",
+        "next": [
+            "ClickRestart"
+        ]
     },
     "ClickRestart": {
-        "desc": "重开本次深渊按钮（仅作为 abyss_align 的识别目标，不参与流程）",
+        "desc": "重开本次深渊按钮（当前流程未使用，保留供后续死亡重试）",
         "recognition": "TemplateMatch",
         "template": "common/restart.png",
         "roi": [
@@ -201,3 +250,8 @@
         "action": "Click"
     }
 }
+
+
+
+
+

@@ -1,0 +1,189 @@
+{
+    // 深渊开启流程（测试用，跑通后再改写为 agent 方法）
+    // 步骤：抬视角 ×4 → 右转找 instruction_icon → 前进 2s → 未见「开始深渊」则每次前进 0.5s 重试
+    "TestEntry": {
+        "desc": "测试入口：开启深渊",
+        "next": [
+            "MoveViewUp"
+        ]
+    },
+    "MoveViewUp": {
+        "desc": "抬视角：向上拖动，重复 4 次",
+        "recognition": "DirectHit",
+        "action": "Swipe",
+        "begin": [
+            550,
+            140,
+            63,
+            41
+        ],
+        "end": [
+            550,
+            53,
+            64,
+            36
+        ],
+        "duration": 300,
+        "repeat": 5,
+        "repeat_delay": 300,
+        "pre_delay": 0,
+        "post_delay": 0,
+        "post_wait_freezes": 300,
+        "next": [
+            "TestFindInstruction"
+        ]
+    },
+    "TestFindInstruction": {
+        "desc": "右转循环：直到在 [608,497,66,52] 看到 instruction_icon",
+        "rate_limit": 300,
+        "timeout": 2000,
+        "on_error": [
+            "MoveForward"
+        ],
+        "next": [
+            "TestInstructionFound",
+            "MoveViewRight"
+        ]
+    },
+    "TestInstructionFound": {
+        "desc": "已对准：instruction_icon 出现在目标位置",
+        "recognition": "TemplateMatch",
+        "template": "common/instruction_icon.png",
+        "roi": [
+            608,
+            497,
+            66,
+            52
+        ],
+        "action": "DoNothing",
+        "next": [
+            "MoveForward"
+        ]
+    },
+    "MoveViewRight": {
+        "desc": "右转一格：未看到 instruction_icon 才滑动，滑完回判定点",
+        "recognition": "TemplateMatch",
+        "template": "common/instruction_icon.png",
+        "roi": [
+            608,
+            497,
+            66,
+            52
+        ],
+        "inverse": true,
+        "action": "Swipe",
+        "begin": [
+            461,
+            61
+        ],
+        "end": [
+            500,
+            61
+        ],
+        "duration": 300,
+        "max_hit": 15,
+        "pre_delay": 0,
+        "post_delay": 0,
+        "post_wait_freezes": 300,
+        "next": [
+            "TestFindInstruction"
+        ]
+    },
+    "MoveForward": {
+        "desc": "前进：持续 2s",
+        "recognition": "DirectHit",
+        "action": "Swipe",
+        "begin": [
+            208, 533
+        ],
+        "end": [
+            230,440
+        ],
+        "duration": 1500,
+        "pre_delay": 0,
+        "post_delay": 0,
+        "post_wait_freezes": 300,
+        "next": [
+            "TestFindAbyssStart"
+        ]
+    },
+    "TestFindAbyssStart": {
+        "desc": "检查「开始深渊」：没有就前进 0.5s 再来一轮",
+        "rate_limit": 300,
+        "timeout": 1500,
+        "on_error": [
+            "TestFailed"
+        ],
+        "next": [
+            "TestAbyssStartFound",
+            "MoveForwardShort"
+        ]
+    },
+    "TestAbyssStartFound": {
+        "desc": "已到达「开始深渊」界面（测试到此结束）",
+        "recognition": "TemplateMatch",
+        "template": "abyss/开始深渊.png",
+        "roi": [
+            630,
+            310,
+            380,
+            100
+        ],
+        "action": "DoNothing",
+        "focus": {
+            "Node.Recognition.Succeeded": {
+                "content": "已识别到「开始深渊」，测试流程结束",
+                "display": [
+                    "log",
+                    "toast"
+                ]
+            }
+        },
+        "next": []
+    },
+    "MoveForwardShort": {
+        "desc": "前进一小步（0.5s）：未看到「开始深渊」才移动",
+        "recognition": "TemplateMatch",
+        "template": "abyss/开始深渊.png",
+        "roi": [
+            630,
+            310,
+            380,
+            100
+        ],
+        "inverse": true,
+        "action": "Swipe",
+        "begin": [
+            190,
+            512,
+            49,
+            45
+        ],
+        "end": [
+            190,
+            454,
+            51,
+            38
+        ],
+        "duration": 500,
+        "max_hit": 40,
+        "pre_delay": 0,
+        "post_delay": 0,
+        "post_wait_freezes": 200,
+        "next": [
+            "TestFindAbyssStart"
+        ]
+    },
+    "TestFailed": {
+        "desc": "测试兜底：未能在限定次数内看到「开始深渊」",
+        "focus": {
+            "Node.Action.Starting": {
+                "content": "开启深渊失败：右转或前进次数用尽，请手动确认角色位置",
+                "display": [
+                    "log",
+                    "toast"
+                ]
+            }
+        }
+    }
+}

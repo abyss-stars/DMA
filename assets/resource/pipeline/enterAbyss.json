@@ -133,7 +133,8 @@
         ],
         "action": "Click",
         "next": [
-            "Confirm"
+            "[JumpBack]Confirm",
+            "AbyssMainLoop"
         ]
     },
         "Confirm":{
@@ -142,9 +143,6 @@
         "roi": [
             648,399,302,60
         ],
-        "action": "Click",
-        "next": [
-            "AbyssMainLoop"
-        ]
+        "action": "Click"
     }
 }
