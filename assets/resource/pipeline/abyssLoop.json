@@ -61,7 +61,7 @@
             18
         ],
         "end": [
-            305,
+            285,
             455,
             15,
             12
@@ -191,5 +191,25 @@
         "next": [
             "AbyssMainLoop"
         ]
+    },
+    "ErrorExit":{
+        "desc": "关卡异常重开",
+        "recognition": "TemplateMatch",
+        "template": "common/errorexit.png",
+        "roi": [
+            12,6,80,59
+        ],
+        "action": "Click",
+        "next": [
+            "ClickRestart"
+        ]
+    },
+    "ClickRestart":{
+        "recognition": "TemplateMatch",
+        "template": "common/restart.png",
+        "roi": [
+            988,602,116,84
+        ],
+        "action": "Click"
     }
 }

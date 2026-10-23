@@ -130,8 +130,8 @@
             "description": "用于刷取深渊代币和密函"
         },
         {
-            "name": "回到主界面",
-            "entry": "BackMainMenu"
+            "name": "test",
+            "entry": "AbyssMainLoop"
         }
     ]
 }
