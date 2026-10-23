@@ -53,10 +53,13 @@
     ],
     // AgentServer（Python 自定义动作/识别）
     // 文档: https://maafw.xyz/docs/1.3-Custom&Agent
+    // 注意 child_args 的相对路径基准是「interface.json 所在目录」（即 assets/），
+    // 而仓库里的 agent/ 在根目录，所以开发态写 ../agent/main.py；
+    // 装配时 tools/install.py 会把它改写成 ./agent/main.py（install/ 下两者同级）。
     "agent": {
         "child_exec": "python",
         "child_args": [
-            "./agent/main.py"
+            "../agent/main.py"
         ]
     },
     // 任务可选项：通用 UI 会据此渲染下拉框

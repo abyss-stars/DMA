@@ -21,7 +21,9 @@ if _rid and not os.environ.get("MAAFW_BINARY_PATH"):
 
 from maa.agent.agent_server import AgentServer  # noqa: E402
 
-import my_action  # noqa: E402,F401
+# 用同目录模块名导入：脚本方式运行时 sys.path[0] 就是 agent/ 目录。
+# 写成 agent.abyss_loop 需要仓库根在 sys.path 上，dev（../agent/main.py）与打包都会 ModuleNotFoundError。
+import abyss_loop  # noqa: E402,F401
 import my_reco  # noqa: E402,F401
 
 

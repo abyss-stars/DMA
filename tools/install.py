@@ -118,6 +118,14 @@ def install_resource():
 
     interface["version"] = version
 
+    # agent 的 child_args 相对 interface.json 所在目录解析：
+    # 仓库里是 ../agent/main.py（interface 在 assets/），install/ 下两者同级，需改回 ./agent/main.py
+    if isinstance(interface.get("agent"), dict):
+        interface["agent"]["child_args"] = [
+            str(arg).replace("../agent/", "./agent/")
+            for arg in interface["agent"].get("child_args", ["./agent/main.py"])
+        ]
+
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
         jsonc.dump(interface, f, ensure_ascii=False, indent=4)
 
