@@ -157,6 +157,16 @@ jobs:
           python ./install.py ${{ needs.meta.outputs.tag }} ${{ matrix.os }} ${{ matrix.arch }}
           cd ..
 
+      # 把可移植 Python + MaaFw 装进包内（agent 用），并改写 interface.json 的 agent.child_exec
+      - name: Bundle agent python
+        if: matrix.os != 'android'
+        shell: bash
+        run: |
+          python ./tools/setup_agent_python.py \
+            --install-dir install \
+            --os ${{ matrix.os }} \
+            --arch ${{ matrix.arch }}
+
       - uses: actions/upload-artifact@v4
         with:
           name: DMA-${{ matrix.os }}-${{ matrix.arch }}
