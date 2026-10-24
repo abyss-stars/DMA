@@ -133,7 +133,6 @@
         ],
         "action": "Click",
         "next": [
-            "[JumpBack]Confirm",
             "AbyssMainLoop"
         ]
     },
