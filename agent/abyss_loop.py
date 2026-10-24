@@ -127,29 +127,42 @@ class AbyssAlignAction(CustomAction):
     # region 重开
 
     def _restart(self, context: Context, cfg: dict) -> bool:
-        """重开本次深渊：先点 ErrorExit（异常退出），再点 ClickRestart（重新开始）。
+        """重开本次深渊，三步依次走：ErrorExit → ClickRestart → Confirm。
 
-        两步都必须走 Context API（AgentServer 下 controller.post_click 会崩）。
-        弹窗出现需要时间，所以用 _wait_for 轮询，而不是死等固定时长。
+        1. ErrorExit    —— 关卡里的异常退出按钮，点开退出/重开菜单
+        2. ClickRestart —— 菜单里的「重新开始」
+        3. Confirm      —— 「确定」二次确认（Confirm 复用 enterAbyss.json 的定义）
+
+        每步统一「先等节点出现，再执行它的动作」：弹窗有弹出动画，
+        死等固定时长既慢又不可靠。全程只用 Context API
+        （AgentServer 下 controller.post_click 会崩）。
+        confirm_node 配成空串/None 可跳过第三步，留作兜底。
         """
-        exit_node = cfg.get("exit_node", "ErrorExit")
-        restart_node = cfg.get("restart_node", "ClickRestart")
-        ready_node = cfg.get("ready_node", "AbyssAlign")
         dialog_timeout = float(cfg.get("dialog_timeout", 5))
+        steps = (
+            (cfg.get("exit_node", "ErrorExit"), 2.0),
+            (cfg.get("restart_node", "ClickRestart"), dialog_timeout),
+            (cfg.get("confirm_node", "Confirm"), dialog_timeout),
+        )
 
-        detail = self._wait_for(context, exit_node, 2.0)
-        if detail is None:
-            print(f"[abyss_align] 未找到 {exit_node}，无法重开", flush=True)
-            return False
-        context.run_action(exit_node, detail.box)
+        done = []
+        for node, timeout in steps:
+            if not node:
+                continue
+            detail = self._wait_for(context, node, timeout)
+            if detail is None:
+                prefix = " → ".join(done) if done else "无"
+                print(
+                    f"[abyss_align] 未等到 {node}，重开中止（已执行: {prefix}）",
+                    flush=True,
+                )
+                return False
+            context.run_action(node, detail.box)
+            done.append(node)
 
-        detail = self._wait_for(context, restart_node, dialog_timeout)
-        if detail is None:
-            print(f"[abyss_align] 未等到 {restart_node}（退出弹窗未出现）", flush=True)
-            return False
-        context.run_action(restart_node, detail.box)
-        print(f"[abyss_align] 已调用 {exit_node} → {restart_node} 重开", flush=True)
+        print(f"[abyss_align] 已调用 {' → '.join(done)} 重开", flush=True)
 
+        ready_node = cfg.get("ready_node", "AbyssAlign")
         deadline = time.time() + float(cfg.get("ready_timeout", 15))
         while time.time() < deadline:
             time.sleep(0.5)

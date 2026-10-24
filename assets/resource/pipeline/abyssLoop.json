@@ -45,7 +45,7 @@
         ]
     },
     "AbyssAlign": {
-        "desc": "开启深渊：抬视角×5 → 右转对准 instruction_icon → 前进1.5s → 微调5次仍未见「开始深渊」则 ErrorExit+ClickRestart 重开（最多2次）（Python: abyss_align）",
+        "desc": "开启深渊：抬视角×5 → 右转对准 instruction_icon → 前进1.5s → 微调5次仍未见「开始深渊」则 ErrorExit+ClickRestart+Confirm 重开（最多2次）（Python: abyss_align）",
         "recognition": "TemplateMatch",
         "template": "abyss/start.png",
         "roi": [
@@ -111,12 +111,14 @@
                 "settle": 200,
                 "max_times": 5
             },
-            // 5) 微调 5 次仍未成功 → ErrorExit + ClickRestart 重开本次深渊，再完整跑一轮
+            // 5) 微调 5 次仍未成功 → ErrorExit → ClickRestart → Confirm 三步重开本次深渊，再完整跑一轮
             "restart": {
                 "enabled": true,
                 "max_times": 2,
                 "exit_node": "ErrorExit",
                 "restart_node": "ClickRestart",
+                // 「确定」二次确认，复用 enterAbyss.json 的同名节点；置空可跳过
+                "confirm_node": "Confirm",
                 "dialog_timeout": 5,
                 "ready_node": "AbyssAlign",
                 "ready_timeout": 15
@@ -223,7 +225,7 @@
         "action": "DoNothing"
     },
     "ErrorExit": {
-        "desc": "关卡异常退出按钮（当前流程未使用，保留供后续死亡重试）",
+        "desc": "重开第 1 步：关卡异常退出按钮（点开退出/重开菜单）",
         "recognition": "TemplateMatch",
         "template": "common/errorexit.png",
         "roi": [
@@ -238,7 +240,7 @@
         ]
     },
     "ClickRestart": {
-        "desc": "重开本次深渊按钮（当前流程未使用，保留供后续死亡重试）",
+        "desc": "重开第 2 步：菜单里的「重新开始」（点完弹「确定」确认框）",
         "recognition": "TemplateMatch",
         "template": "common/restart.png",
         "roi": [
@@ -247,7 +249,10 @@
             116,
             84
         ],
-        "action": "Click"
+        "action": "Click",
+        "next": [
+            "Confirm"
+        ]
     }
 }
 
