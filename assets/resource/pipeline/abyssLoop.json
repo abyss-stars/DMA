@@ -4,6 +4,7 @@
         "timeout": -1,
         "rate_limit": 2000,
         "next": [
+            "[JumpBack]Confirm",
             "AbyssStart",
             "AbyssAlign",
             "AbyssNextFloor",
@@ -98,18 +99,18 @@
                     533
                 ],
                 "end": [
-                    220,
+                    230,
                     440
                 ],
-                "duration": 1500,
+                "duration": 650,
                 "settle": 300
             },
             // 4) 未见「开始深渊」时每次前进一小步，坐标复用 forward（对应 MoveForwardShort）
             "step": {
-                "duration": 200,
+                "duration": 100,
                 // 小步之后等画面静止的时间
                 "settle": 200,
-                "max_times": 5
+                "max_times": 10
             },
             // 5) 微调 5 次仍未成功 → ErrorExit → ClickRestart → Confirm 三步重开本次深渊，再完整跑一轮
             "restart": {
@@ -172,42 +173,20 @@
             "AbyssMainLoop"
         ],
         "next": [
-            "qSkill"
+            "AbyssSkill"
         ]
     },
-    "qSkill": {
-        "recognition": "TemplateMatch",
-        "template": "abyss/skill/艾达大招.png",
-        "roi": [
-            880,
-            560,
-            180,
-            160
+    "AbyssSkill": {
+        "desc": "角色技能分派：各角色技能在 pipeline/skill/<角色英文名>.json，由 interface.json 的「挂机角色」覆盖这里的 next",
+        "next": [
+            "Skill_ada"
         ],
-        "action": "Click",
-        "pre_delay": 0,
-        "post_delay": 0,
-        "timeout": 30000,
         "on_error": [
             "AbyssMainLoop"
-        ],
-        "next": [
-            "eSkill"
         ]
     },
-    "eSkill": {
-        "recognition": "TemplateMatch",
-        "template": "abyss/skill/艾达e技能.png",
-        "roi": [
-            800,
-            570,
-            180,
-            150
-        ],
-        "action": "Click",
-        "pre_delay": 0,
-        "post_delay": 0,
-        "timeout": 30000,
+    "SkillMiss": {
+        "desc": "角色技能没识别到（大招动画、冷却或被遮挡）：不阻塞流程，直接回主循环等结束判定",
         "next": [
             "AbyssMainLoop"
         ]

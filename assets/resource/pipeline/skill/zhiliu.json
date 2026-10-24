@@ -1,0 +1,53 @@
+{
+    // 止流（Zhiliu）挂机技能：Q（大招）→ E 技能，各点一次，放完回主循环
+    // 图片来源：image/abyss/char/zhiliu_q.png、zhiliu_e.png
+    // 由 abyssLoop.json 的 AbyssSkill 节点分派到这里（见 interface.json 的「挂机角色」）
+    "Skill_zhiliu": {
+        "desc": "止流挂机入口",
+        "next": [
+            "ZhiliuQ"
+        ]
+    },
+    "ZhiliuQ": {
+        "desc": "止流：点一次 Q（大招）",
+        "recognition": "TemplateMatch",
+        "template": "abyss/char/zhiliu_q.png",
+        "roi": [
+            880,
+            560,
+            180,
+            160
+        ],
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 3000,
+        "on_error": [
+            "SkillMiss"
+        ],
+        "next": [
+            "ZhiliuE"
+        ]
+    },
+    "ZhiliuE": {
+        "desc": "止流：点一次 E 技能",
+        "recognition": "TemplateMatch",
+        "template": "abyss/char/zhiliu_e.png",
+        "roi": [
+            800,
+            570,
+            180,
+            150
+        ],
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 3000,
+        "on_error": [
+            "SkillMiss"
+        ],
+        "next": [
+            "AbyssMainLoop"
+        ]
+    }
+}

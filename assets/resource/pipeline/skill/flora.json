@@ -1,0 +1,32 @@
+{
+    // 芙罗拉（Flora）挂机技能：只放一次 Q（大招），放完回主循环
+    // 图片来源：image/abyss/char/flora_q.png
+    // 由 abyssLoop.json 的 AbyssSkill 节点分派到这里（见 interface.json 的「挂机角色」）
+    "Skill_flora": {
+        "desc": "芙罗拉挂机入口",
+        "next": [
+            "FloraQ"
+        ]
+    },
+    "FloraQ": {
+        "desc": "芙罗拉：点一次 Q（大招）",
+        "recognition": "TemplateMatch",
+        "template": "abyss/char/flora_q.png",
+        "roi": [
+            880,
+            560,
+            180,
+            160
+        ],
+        "action": "Click",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "timeout": 3000,
+        "on_error": [
+            "SkillMiss"
+        ],
+        "next": [
+            "AbyssMainLoop"
+        ]
+    }
+}

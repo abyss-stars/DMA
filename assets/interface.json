@@ -90,33 +90,37 @@
                 {
                     "name": "艾达挂机",
                     "label": "艾达挂机",
-                    // 艾达：大招 + E 技能都识别（与 pipeline 默认值一致，显式写出便于对照）
+                    // 角色技能各自一个文件（pipeline/skill/<英文名>.json），这里只负责把主循环分派过去
+                    "description": "只放一次 Q（大招）",
                     "pipeline_override": {
-                        "qSkill": {
-                            "template": "abyss/skill/艾达大招.png",
+                        "AbyssSkill": {
                             "next": [
-                                "eSkill"
+                                "Skill_ada"
                             ]
-                        },
-                        "eSkill": {
-                            "template": "abyss/skill/艾达e技能.png",
-                            "enabled": true
                         }
                     }
                 },
                 {
                     "name": "芙罗拉挂机",
                     "label": "芙罗拉挂机",
-                    // 芙罗拉：只放大招；暂无可用的 E 技能模板，故跳过 eSkill 直接回主循环
+                    "description": "只放一次 Q（大招）",
                     "pipeline_override": {
-                        "qSkill": {
-                            "template": "abyss/skill/fll大招.png",
+                        "AbyssSkill": {
                             "next": [
-                                "AbyssMainLoop"
+                                "Skill_flora"
                             ]
-                        },
-                        "eSkill": {
-                            "enabled": false
+                        }
+                    }
+                },
+                {
+                    "name": "止流挂机",
+                    "label": "止流挂机",
+                    "description": "Q（大招）→ E 技能，各点一次",
+                    "pipeline_override": {
+                        "AbyssSkill": {
+                            "next": [
+                                "Skill_zhiliu"
+                            ]
                         }
                     }
                 }
